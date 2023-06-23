@@ -3,14 +3,15 @@ from dotenv import load_dotenv
 import os
 import json
 import pandas as pd
+from datetime import datetime
+from dateutil import tz
 
-# define secrets
-
+# function to load secrets
 def secretFunc():
     load_dotenv()
     global URL 
     global api_key
-    global stopcodes # stopcodes intrinsically defines the destination as SF-bound
+    global stopcodes # stopcodes define a direction already
     global operator
     URL = os.getenv('URL')
     api_key = os.getenv('api_key')
@@ -23,7 +24,8 @@ def secretFunc():
     
     return()
 
-# use 511org API to find next arrival at each of the provided stopcodes
+# function to use 511org API to find next arrivals
+# at each of the provided stopcodes
 def getNextTransit(stopcodes):
     arrivals = list()
     for stop in stopcodes:
@@ -38,27 +40,46 @@ def getNextTransit(stopcodes):
         stopInfo = stopInfo['ServiceDelivery']['StopMonitoringDelivery']['MonitoredStopVisit']
 
         for arrival in stopInfo:
+            # Get arrivalTime from JSON content
             arrivalTime = arrival['MonitoredVehicleJourney']['MonitoredCall']['ExpectedArrivalTime']
+
+            # Convert arrivalTime into 12h Pacific time
+            utc_datetime = datetime.fromisoformat(arrivalTime[:-1])
+
+            # Define the timezones
+            utc_tz = tz.gettz('UTC')
+            pacific_tz = tz.gettz('America/Los_Angeles')
+
+            # Set the UTC timezone for the datetime object
+            utc_datetime = utc_datetime.replace(tzinfo=utc_tz)
+
+            # Convert the datetime object to Pacific time
+            pacific_datetime = utc_datetime.astimezone(pacific_tz)
+
+            # Format the datetime object as a 12-hour time string
+            time_str = pacific_datetime.strftime('%I:%M:%S %p')
+
+            # Get arrivalDirection from JSON content
             arrivalDirection = arrival['MonitoredVehicleJourney']['MonitoredCall']['DestinationDisplay']
 
-            arrivals.append([arrivalDirection, arrivalTime])
+            # Append [direction, time] pair to list
+            arrivals.append([arrivalDirection, time_str])
+
             # UNIVERSAL time of next 3 projected arrivals for specified stop
+
+    # Convert nested list to DataFrame
+    arrivals = pd.DataFrame(arrivals, columns=['arrivalDirection','arrivalTime'])
     return(arrivals)
 
 
     ''' 
     todo:
-        - save arrival times in some pd object
-        - parse nextVehicle for each direction (est. time, etc.)
         - connect to RPLCD to print information
         - implement refreshment interval
-        - multiple functions for multiple services? additional stops?
-            - consider making more stop information easily addable
-        - expansion: large e-ink screen with this info and weather and daily calendar    
     '''
     return()
 
 if __name__ == '__main__':
     secretFunc()
-    arrivals = getNextTransit(stopcodes)
-    print(arrivals)
+    transitArrivals = getNextTransit(stopcodes)
+    print(transitArrivals)
