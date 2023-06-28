@@ -1,6 +1,3 @@
 [submodule "e_paper_weather_display"]
 	path = e_paper_weather_display
 	url = https://github.com/AbnormalDistributions/e_paper_weather_display.git
-[submodule "weather_display"]
-	path = weather_display
-	url = https://github.com/AbnormalDistributions/e_paper_weather_display.git

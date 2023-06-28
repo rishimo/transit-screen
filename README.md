@@ -6,7 +6,7 @@ This project is based heavily off of James Howard's [e_paper_weather_display pro
 
 ## Goals
 
-Using an e-ink screen, display next transit arrival times at configured stops, along with other set widgets, including weather/AQI, calendar, news, etc. The screen should update estimated transit arrival time once a minute or so, and fully refresh once or twice a day to maintain longevity. 
+Using an e-ink screen, display next transit arrival times at configured stops and configurable weather data (temp/feels-like, forecasts, AQI, etc.). The screen should update inbound and outbound forecasted transit arrival times once every 5 minutes or so, and fully refresh once or twice a day to maintain longevity.
 
 _Future:_ Revamp display to include different forecast information from OpenWeatherMap's API 3.0
 
