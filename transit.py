@@ -17,20 +17,21 @@ def secretFunc():
 	global OPERATORS
 	global STOPNAMES
 	global OPENWEATHER_API_KEY
+	global LATITUDE
+	global LONGITUDE
 
 	TRANSIT_URL = 'http://api.511.org/transit/StopMonitoring/'
 	TRANSIT_API_KEY = os.environ['TRANSIT_API_KEY']
 	OPENWEATHER_API_KEY = os.environ['OPENWEATHER_API_KEY']
+	LATITUDE = os.environ['LAT']
+	LONGITUDE = os.environ['LONG']
 
 	# update STOPCODES, OPERATORS, DIRECTIONS, STOPNAMES to add add'l stops
-
 	STOPCODES = [13915, 13914, 14509, 14510]
-
 	OPERATORS = ['SF','SF', 'SF', 'SF']
-
 	DIRECTIONS = ['Inbound', 'Outbound', 'Inbound', 'Outbound']
-
 	STOPNAMES = ['Stanyan', 'Stanyan', 'Folsom', 'Folsom']
+
 
 	return()
 
