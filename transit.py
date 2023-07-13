@@ -6,7 +6,6 @@ import pandas as pd
 from datetime import datetime
 from datetime import timezone
 from dateutil import tz
-import re
 
 # function to load secrets
 def secretFunc():
@@ -18,16 +17,12 @@ def secretFunc():
 	global OPERATORS
 	global STOPNAMES
 	global OPENWEATHER_API_KEY
-	global LAT
-	global LONG
 
 	TRANSIT_URL = 'http://api.511.org/transit/StopMonitoring/'
-	TRANSIT_API_KEY = os.environ['transit_api_key']
-	OPENWEATHER_API_KEY = os.environ['openweather_api_key']
-	LAT = os.environ['lat']
-	LONG = os.environ['long']
+	TRANSIT_API_KEY = os.environ['TRANSIT_API_KEY']
+	OPENWEATHER_API_KEY = os.environ['OPENWEATHER_API_KEY']
 
-	# update STOPCODES, OPERATORS, DIRECTIONS to add add'l stops
+	# update STOPCODES, OPERATORS, DIRECTIONS, STOPNAMES to add add'l stops
 
 	STOPCODES = [13915, 13914, 14509, 14510]
 
@@ -40,7 +35,8 @@ def secretFunc():
 	return()
 
 # function to use 511org API to find next arrivals at each of the provided STOPCODES
-def getNextTransit(STOPCODES, DIRECTIONS, OPERATORS, STOPNAMES):
+def getNextTransit():
+	secretFunc()
 	arrivals = list()
 	for i, stop in enumerate(STOPCODES):
 		r = requests.get(TRANSIT_URL, 
@@ -72,7 +68,7 @@ def getNextTransit(STOPCODES, DIRECTIONS, OPERATORS, STOPNAMES):
 			pacific_datetime = utc_datetime.astimezone(pacific_tz)
 
 			# Format the datetime object as a 12-hour time string
-			time_str = pacific_datetime.strftime('%I:%M:%S %p')
+			time_str = pacific_datetime.strftime('%I:%M %p')
 			
 			# Calculte timeToArrival
 			timeToArrival = pacific_datetime - currentTime
@@ -98,6 +94,5 @@ def getNextTransit(STOPCODES, DIRECTIONS, OPERATORS, STOPNAMES):
 
 # main function
 if __name__ == '__main__':
-	secretFunc()
-	transitArrivals = getNextTransit(STOPCODES, DIRECTIONS, OPERATORS, STOPNAMES)
+	transitArrivals = getNextTransit()
 	print(transitArrivals)
