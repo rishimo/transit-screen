@@ -11,45 +11,41 @@ import re
 # function to load secrets
 def secretFunc():
 	load_dotenv()
-	global transit_URL
-	global transit_api_key
-	global stopcodes
-	global directions
-	global operators
-	global openweather_api_key
-	global lat
-	global long
+	global TRANSIT_URL
+	global TRANSIT_API_KEY
+	global STOPCODES
+	global DIRECTIONS
+	global OPERATORS
+	global STOPNAMES
+	global OPENWEATHER_API_KEY
+	global LAT
+	global LONG
 
-	transit_URL = os.getenv('transit_URL')
-	transit_api_key = os.getenv('transit_api_key')
-	stopcodes = os.getenv('stopcodes')
-	operators = os.getenv('operators')
-	directions = os.getenv('directions')
-	openweather_api_key = os.getenv('openweather_api_key')
-	lat = os.getenv('lat')
-	long = os.getenv('long')
+	TRANSIT_URL = 'http://api.511.org/transit/StopMonitoring/'
+	TRANSIT_API_KEY = os.environ['transit_api_key']
+	OPENWEATHER_API_KEY = os.environ['openweather_api_key']
+	LAT = os.environ['lat']
+	LONG = os.environ['long']
 
-	stopcodes = stopcodes.split(',')
-	for i, stop in enumerate(stopcodes):
-		stopcodes[i] = stop.strip()
+	# update STOPCODES, OPERATORS, DIRECTIONS to add add'l stops
 
-	operators = operators.split(',')
-	for i, operator in enumerate(operators):
-		operators[i] = re.sub('[^a-zA-Z]+', '', operator)
+	STOPCODES = [13915, 13914, 14509, 14510]
 
-	directions = directions.split(',')
-	for i, dir in enumerate(directions):
-		directions[i] = re.sub('[^a-zA-Z]+', '', dir)
+	OPERATORS = ['SF','SF', 'SF', 'SF']
+
+	DIRECTIONS = ['Inbound', 'Outbound', 'Inbound', 'Outbound']
+
+	STOPNAMES = ['Stanyan', 'Stanyan', 'Folsom', 'Folsom']
 
 	return()
 
-# function to use 511org API to find next arrivals at each of the provided stopcodes
-def getNextTransit(stopcodes, directions, operators):
+# function to use 511org API to find next arrivals at each of the provided STOPCODES
+def getNextTransit(STOPCODES, DIRECTIONS, OPERATORS, STOPNAMES):
 	arrivals = list()
-	for i, stop in enumerate(stopcodes):
-		r = requests.get(f'{transit_URL}/StopMonitoring', 
-						 params = {'agency': operators[i], 
-								   'api_key': transit_api_key,
+	for i, stop in enumerate(STOPCODES):
+		r = requests.get(TRANSIT_URL, 
+						 params = {'agency': OPERATORS[i], 
+								   'api_key': TRANSIT_API_KEY,
 								   'stopcode': stop})
 		
 		content = json.loads(r.content)
@@ -81,16 +77,16 @@ def getNextTransit(stopcodes, directions, operators):
 			# Calculte timeToArrival
 			timeToArrival = pacific_datetime - currentTime
 			timeToArrival = divmod(timeToArrival.seconds, 60)
-			timeToArrival = f"{timeToArrival[0]}:{timeToArrival[1]}"
+			timeToArrival = f"{str(timeToArrival[0]).rjust(2,'0')}:{str(timeToArrival[1]).rjust(2,'0')}"
 
 			# Get destination from JSON content
 			destination = arrival['MonitoredVehicleJourney']['MonitoredCall']['DestinationDisplay']
 
 			# Append [code, direction, time]  to list
-			arrivals.append([stop, directions[i], destination, time_str, timeToArrival])
+			arrivals.append([STOPNAMES[i], DIRECTIONS[i], destination, time_str, timeToArrival, stop])
 
 	# Convert nested list to DataFrame
-	arrivals = pd.DataFrame(arrivals, columns=['stopcode', 'direction', 'destination','arrivalTime', 'timeToArrival'])
+	arrivals = pd.DataFrame(arrivals, columns=['stopnames', 'direction', 'destination','arrivalTime', 'timeToArrival', 'stopcode'])
 	return(arrivals)
 
 
@@ -103,5 +99,5 @@ def getNextTransit(stopcodes, directions, operators):
 # main function
 if __name__ == '__main__':
 	secretFunc()
-	transitArrivals = getNextTransit(stopcodes, directions, operators)
-	print(transitArrivals)  
+	transitArrivals = getNextTransit(STOPCODES, DIRECTIONS, OPERATORS, STOPNAMES)
+	print(transitArrivals)
