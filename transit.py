@@ -95,5 +95,8 @@ def getNextTransit():
 
 # main function
 if __name__ == '__main__':
-	transitArrivals = getNextTransit()
-	print(transitArrivals)
+	try:
+		transitArrivals = getNextTransit()
+		print(transitArrivals)
+	except TypeError:
+		print("No arrivals found.")
