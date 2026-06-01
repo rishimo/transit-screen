@@ -1,3 +1,3 @@
 #!/bin/bash
 pkill -f "python.*transit_screen" || true
-uv run transit-screen
+uv run python -m transit_screen.main

@@ -34,7 +34,7 @@ This project is based on James Howard's [e_paper_weather_display](https://github
    - `TRANSIT_API_KEY` — from [511.org](https://511.org/developer-resources/transit-api)
    - `LAT`, `LONG` — your coordinates (defaults: San Francisco)
 
-3. Install dependencies:
+3. Install dependencies (automatically fetches Pi-compatible wheels from piwheels.org):
    ```bash
    uv sync
    ```

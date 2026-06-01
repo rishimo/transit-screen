@@ -9,7 +9,10 @@ dependencies = [
   "requests",
   "python-dotenv",
   "python-dateutil",
+  "spidev",
+  "RPi.GPIO",
 ]
 
-[project.scripts]
-transit-screen = "transit_screen.main:main"
+[tool.uv]
+find-links = ["./wheels"]
+index-url = "https://piwheels.org/simple"
