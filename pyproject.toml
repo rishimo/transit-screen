@@ -1,0 +1,15 @@
+[project]
+name = "transit-screen"
+version = "0.1.0"
+description = "E-ink transit and weather display for Raspberry Pi Zero W"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "pillow",
+  "requests",
+  "python-dotenv",
+  "python-dateutil",
+]
+
+[project.scripts]
+transit-screen = "transit_screen.main:main"

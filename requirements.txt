@@ -1,5 +1,0 @@
-requests
-python-dotenv
-pandas
-datetime
-python-dateutil
