@@ -34,6 +34,9 @@ _day_map = {
 }
 TRASH_DAYS: list[int] = [_day_map[day.lower()] for day in _trash_days_names]
 
+NIGHTLY_REFRESH_ENABLED: bool = app_config["display"]["nightly_refresh"]["enabled"]
+NIGHTLY_REFRESH_HOURS: list[int] = app_config["display"]["nightly_refresh"]["hours"]
+
 REFRESH_INTERVAL: int = 600
 ERROR_RETRY_INTERVAL: int = 30
 CSV_OPTION: bool = False

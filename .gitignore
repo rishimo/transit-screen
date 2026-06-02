@@ -3,4 +3,5 @@
 **/*.whl
 .claude/**/*
 config.yaml
-test_output.*
+**/*.png
+**/*.bmp

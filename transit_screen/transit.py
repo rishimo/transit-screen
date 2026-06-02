@@ -30,7 +30,8 @@ def get_next_transit() -> list[dict]:
         )
 
         for visit in stop_visits[: stop["arrivals_shown"]]:
-            call = visit["MonitoredVehicleJourney"]["MonitoredCall"]
+            journey = visit["MonitoredVehicleJourney"]
+            call = journey["MonitoredCall"]
             arrival_iso = call["ExpectedArrivalTime"]
 
             utc_dt = datetime.fromisoformat(arrival_iso.rstrip("Z")).replace(tzinfo=utc_tz)
@@ -42,6 +43,8 @@ def get_next_transit() -> list[dict]:
             mins, secs = divmod(max(0, int(delta.total_seconds())), 60)
             time_to_arrival = f"{str(mins).rjust(2, '0')}:{str(secs).rjust(2, '0')}"
 
+            route_name = journey.get("PublishedLineName") or journey.get("LineRef", "?")
+
             arrivals.append(
                 {
                     "stop_name": stop["name"],
@@ -50,6 +53,7 @@ def get_next_transit() -> list[dict]:
                     "arrival_time": time_str,
                     "time_to_arrival": time_to_arrival,
                     "stop_code": stop["id"],
+                    "route_name": route_name,
                 }
             )
 
