@@ -32,6 +32,14 @@ def _get_fonts():
 
 def render_screen(weather_data: dict, transit_data: list[dict]) -> Image.Image:
     """Render weather and transit data to PIL Image."""
+    if weather_data["mode"] == "timeline":
+        return render_timeline_screen(weather_data, transit_data)
+    else:
+        return render_point_in_time_screen(weather_data, transit_data)
+
+
+def render_point_in_time_screen(weather_data: dict, transit_data: list[dict]) -> Image.Image:
+    """Render current weather snapshot."""
     fonts = _get_fonts()
     template = Image.open(config.ASSETS_DIR / "template.png")
     draw = ImageDraw.Draw(template)
@@ -76,12 +84,132 @@ def render_screen(weather_data: dict, transit_data: list[dict]) -> Image.Image:
     current_time = datetime.now().strftime("%H:%M")
     draw.text((627, 375), current_time, font=fonts[60], fill=WHITE)
 
-    weekday = datetime.today().weekday()
-    if weekday == 0 or weekday == 3:
-        draw.rectangle((345, 13, 705, 55), fill=BLACK)
-        draw.text((355, 15), "TAKE OUT TRASH TODAY!", font=fonts[30], fill=WHITE)
+    if config.TRASH_ENABLED:
+        weekday = datetime.today().weekday()
+        if weekday in config.TRASH_DAYS:
+            draw.rectangle((345, 13, 705, 55), fill=BLACK)
+            draw.text((355, 15), "TAKE OUT TRASH TODAY!", font=fonts[30], fill=WHITE)
 
     return template
+
+
+def render_timeline_screen(weather_data: dict, transit_data: list[dict]) -> Image.Image:
+    """Render forecast timeline strip."""
+    fonts = _get_fonts()
+    image = Image.new("1", (800, 480), 255)
+    draw = ImageDraw.Draw(image)
+
+    timeline = weather_data["timeline"]
+    forecast_data = weather_data["data"]
+
+    if timeline == "7d":
+        _render_7day_timeline(image, draw, fonts, forecast_data, transit_data)
+    else:
+        _render_hourly_timeline(image, draw, fonts, timeline, forecast_data, transit_data)
+
+    return image
+
+
+def _render_7day_timeline(
+    image: Image.Image, draw, fonts, forecast_data: list[dict], transit_data: list[dict]
+) -> None:
+    """Render 7-day forecast strip."""
+    from datetime import datetime as dt
+
+    col_width = 800 // 7
+    y_start = 20
+
+    for i, day in enumerate(forecast_data):
+        x = i * col_width
+        day_dt = dt.fromtimestamp(day["time"])
+        day_str = day_dt.strftime("%a")
+
+        draw.text((x + 5, y_start), day_str, font=fonts[22], fill=BLACK)
+
+        icon_code = day["icon"]
+        icon_path = config.ASSETS_DIR / "icons" / f"{icon_code}.png"
+        if icon_path.exists():
+            icon = Image.open(icon_path)
+            icon.thumbnail((col_width - 10, 100))
+            image.paste(icon, (x + 5, y_start + 25))
+
+        high_str = f"{day['temp_high']:.0f}°"
+        low_str = f"{day['temp_low']:.0f}°"
+        precip_str = f"{day['precip_prob']:.0f}%"
+
+        draw.text((x + 5, y_start + 130), high_str, font=fonts[22], fill=BLACK)
+        draw.text((x + 5, y_start + 155), low_str, font=fonts[22], fill=BLACK)
+        draw.text((x + 5, y_start + 180), precip_str, font=fonts[22], fill=BLACK)
+
+        if i < 6:
+            draw.line((x + col_width, y_start, x + col_width, y_start + 200), fill=BLACK)
+
+    draw.rectangle((0, 220, 800, 222), fill=BLACK)
+
+    if len(transit_data) > 0:
+        t1 = f"Next: {transit_data[0]['arrival_time']}"
+    else:
+        t1 = "Next: No arrivals"
+
+    draw.text((20, 240), t1, font=fonts[30], fill=BLACK)
+
+    current_time = dt.now().strftime("%H:%M")
+    draw.text((600, 400), f"Updated: {current_time}", font=fonts[22], fill=BLACK)
+
+
+def _render_hourly_timeline(
+    image: Image.Image, draw, fonts, timeline: str, forecast_data: list[dict],
+    transit_data: list[dict]
+) -> None:
+    """Render hourly forecast strip (12h or 24h)."""
+    from datetime import datetime as dt
+
+    hours = int(timeline.rstrip("h"))
+    step = max(1, hours // 12)
+    col_width = 800 // 12
+    y_start = 20
+
+    col_idx = 0
+    for i in range(0, len(forecast_data), step):
+        if col_idx >= 12:
+            break
+        hour = forecast_data[i]
+        x = col_idx * col_width
+
+        hour_dt = dt.fromtimestamp(hour["time"])
+        hour_str = hour_dt.strftime("%I%p").lstrip("0")
+
+        draw.text((x + 2, y_start), hour_str, font=fonts[22], fill=BLACK)
+
+        icon_code = hour["icon"]
+        icon_path = config.ASSETS_DIR / "icons" / f"{icon_code}.png"
+        if icon_path.exists():
+            icon = Image.open(icon_path)
+            icon.thumbnail((col_width - 4, 80))
+            image.paste(icon, (x + 2, y_start + 25))
+
+        temp_str = f"{hour['temp']:.0f}°"
+        precip_str = f"{hour['precip_prob']:.0f}%"
+
+        draw.text((x + 2, y_start + 110), temp_str, font=fonts[22], fill=BLACK)
+        draw.text((x + 2, y_start + 135), precip_str, font=fonts[22], fill=BLACK)
+
+        if col_idx < 11:
+            draw.line((x + col_width, y_start, x + col_width, y_start + 160), fill=BLACK)
+
+        col_idx += 1
+
+    draw.rectangle((0, 200, 800, 202), fill=BLACK)
+
+    if len(transit_data) > 0:
+        t1 = f"Next: {transit_data[0]['arrival_time']}"
+    else:
+        t1 = "Next: No arrivals"
+
+    draw.text((20, 220), t1, font=fonts[30], fill=BLACK)
+
+    current_time = dt.now().strftime("%H:%M")
+    draw.text((600, 400), f"Updated: {current_time}", font=fonts[22], fill=BLACK)
 
 
 def write_to_display(epd, image: Image.Image) -> None:

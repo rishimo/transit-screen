@@ -15,13 +15,13 @@ def get_next_transit() -> list[dict]:
     pacific_tz = tz.gettz("America/Los_Angeles")
     utc_tz = tz.gettz("UTC")
 
-    for i, stop in enumerate(config.STOP_CODES):
+    for stop in config.STOPS:
         r = requests.get(
             TRANSIT_URL,
             params={
-                "agency": config.OPERATORS[i],
+                "agency": stop["operator"],
                 "api_key": config.TRANSIT_API_KEY,
-                "stopcode": stop,
+                "stopcode": stop["id"],
             },
         )
         content = json.loads(r.content)
@@ -29,7 +29,7 @@ def get_next_transit() -> list[dict]:
             content["ServiceDelivery"]["StopMonitoringDelivery"]["MonitoredStopVisit"]
         )
 
-        for visit in stop_visits:
+        for visit in stop_visits[: stop["arrivals_shown"]]:
             call = visit["MonitoredVehicleJourney"]["MonitoredCall"]
             arrival_iso = call["ExpectedArrivalTime"]
 
@@ -44,12 +44,12 @@ def get_next_transit() -> list[dict]:
 
             arrivals.append(
                 {
-                    "stop_name": config.STOP_NAMES[i],
-                    "direction": config.DIRECTIONS[i],
+                    "stop_name": stop["name"],
+                    "direction": stop["direction"],
                     "destination": call["DestinationDisplay"],
                     "arrival_time": time_str,
                     "time_to_arrival": time_to_arrival,
-                    "stop_code": stop,
+                    "stop_code": stop["id"],
                 }
             )
 

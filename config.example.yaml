@@ -1,0 +1,25 @@
+location:
+  lat: 37.70
+  long: -122.40
+
+transit:
+  stops:
+    - id: 14509
+      operator: SF
+      direction: Inbound
+      name: Folsom
+      arrivals_shown: 2
+    - id: 14510
+      operator: SF
+      direction: Outbound
+      name: Folsom
+      arrivals_shown: 2
+
+weather:
+  mode: point-in-time
+  timeline: 24h
+
+reminders:
+  trash:
+    enabled: true
+    days: [monday, thursday]
