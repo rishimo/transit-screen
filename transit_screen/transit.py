@@ -43,7 +43,7 @@ def get_next_transit() -> list[dict]:
             mins, secs = divmod(max(0, int(delta.total_seconds())), 60)
             time_to_arrival = f"{str(mins).rjust(2, '0')}:{str(secs).rjust(2, '0')}"
 
-            route_name = journey.get("PublishedLineName") or journey.get("LineRef", "?")
+            route_name = journey.get("LineRef") or journey.get("PublishedLineName", "?")
 
             arrivals.append(
                 {
