@@ -16,8 +16,8 @@ transit:
       arrivals_shown: 2
 
 weather:
-  mode: point-in-time
-  timeline: 24h
+  mode: point-in-time    # point-in-time or timeline
+  timeline: 24h          # 7d, 12h, or 24h (ignored if mode is point-in-time)
 
 reminders:
   trash:

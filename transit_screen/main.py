@@ -70,7 +70,8 @@ def main():
                     )
                 print("Weather data appended to CSV.")
 
-            if datetime.now().strftime("%H") == "03":
+            current_hour = int(datetime.now().strftime("%H"))
+            if config.NIGHTLY_REFRESH_ENABLED and current_hour in config.NIGHTLY_REFRESH_HOURS:
                 print("Clearing screen to avoid burn-in.")
                 clear_display(epd)
                 time.sleep(3600)
@@ -84,7 +85,8 @@ def main():
 
         except KeyboardInterrupt:
             print("Shutting down...")
-            epd.sleep()
+            if epd is not None:
+                epd.sleep()
             break
         except Exception as e:
             print(f"Error: {e}")

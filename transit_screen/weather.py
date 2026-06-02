@@ -17,7 +17,11 @@ def get_weather() -> dict:
     elif config.WEATHER_MODE == "timeline":
         return _get_timeline(data)
     else:
-        raise ValueError(f"Unknown weather mode: {config.WEATHER_MODE}")
+        raise ValueError(
+            f"Unknown weather mode: {config.WEATHER_MODE!r}\n"
+            f"Valid modes: 'point-in-time' or 'timeline'\n"
+            f"Check config.yaml: weather.mode"
+        )
 
 
 def _get_point_in_time(data: dict) -> dict:

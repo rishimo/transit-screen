@@ -1,0 +1,21 @@
+[Unit]
+Description=Transit Screen - Real-time transit and weather display
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/transit-screen
+ExecStart=/home/pi/.local/bin/uv run transit_screen/main.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables for the app
+Environment="PATH=/home/pi/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+EnvironmentFile=/home/pi/transit-screen/.env
+
+[Install]
+WantedBy=multi-user.target

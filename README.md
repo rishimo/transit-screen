@@ -19,6 +19,18 @@ This project is based on James Howard's [e_paper_weather_display](https://github
 
 ### Installation
 
+**Quick Setup (Raspberry Pi)**
+
+```bash
+git clone https://github.com/rishimo/transit-screen.git
+cd transit-screen
+cp .env.example .env          # Add your API keys
+cp config.example.yaml config.yaml  # Customize your config
+bash scripts/setup-pi.sh       # Install deps + systemd service
+```
+
+**Manual Setup**
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/rishimo/transit-screen.git
@@ -33,11 +45,22 @@ This project is based on James Howard's [e_paper_weather_display](https://github
    - `PIRATE_WEATHER_API_KEY` — from [Pirate Weather](https://pirate-weather.apiable.io)
    - `TRANSIT_API_KEY` — from [511.org](https://511.org/developer-resources/transit-api)
 
-3. Create a `config.yaml` file (copy from `config.example.yaml`)
+3. Create and customize `config.yaml`:
+   ```bash
+   cp config.example.yaml config.yaml
+   nano config.yaml
+   ```
 
 4. Install dependencies (automatically fetches Pi-compatible wheels from piwheels.org):
    ```bash
    uv sync
+   ```
+
+5. Install systemd service (for auto-start on boot):
+   ```bash
+   sudo cp transit-screen.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable transit-screen
    ```
 
 ## Usage
@@ -136,15 +159,19 @@ transit:
 ### Weather Display
 ```yaml
 weather:
-  mode: point-in-time     # point-in-time, 7d, or 24h
+  mode: point-in-time     # point-in-time or timeline
   timeline: 24h           # Ignored if mode is point-in-time
-                          # Options: 12h, 24h, 7d
+                          # Options: 7d, 12h, or 24h
 ```
 
 **Modes:**
 - `point-in-time` — Current weather snapshot with large temperature, "feels like", high/low temps, weather icon, and precipitation %.
-- `7d` — 7-day forecast timeline with daily high/low, precip%, and weather icons.
-- `24h` (or `12h`) — Hourly forecast with temperature trend chart, hourly icons, temps, and precip%.
+- `timeline` — Forecast strip; use `timeline` option below to choose between 7-day, 12-hour, or 24-hour.
+
+**Timeline Options** (only used when mode is `timeline`):
+- `7d` — 7-day forecast with daily high/low, precip%, and weather icons.
+- `12h` — 12-hour forecast with temperature trend chart, hourly icons, temps, and precip%.
+- `24h` — 24-hour forecast with temperature trend chart, hourly icons, temps, and precip%.
 
 ### Trash Reminder
 ```yaml
@@ -282,7 +309,48 @@ Reserved space at the top of all layouts (42px). If disabled, space shows as bla
 
 ## Running on Startup
 
-Add to crontab on the Pi:
+### Option 1: systemd Service (Recommended)
+
+Create a systemd service to automatically start on boot with auto-restart on failure:
+
+1. Copy the service file to systemd:
+   ```bash
+   sudo cp transit-screen.service /etc/systemd/system/
+   ```
+
+2. Enable and start the service:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable transit-screen
+   sudo systemctl start transit-screen
+   ```
+
+3. Check status:
+   ```bash
+   sudo systemctl status transit-screen
+   ```
+
+4. View logs:
+   ```bash
+   sudo journalctl -u transit-screen -f  # follow logs in real-time
+   sudo journalctl -u transit-screen -n 50  # last 50 lines
+   ```
+
+5. Stop or restart:
+   ```bash
+   sudo systemctl stop transit-screen
+   sudo systemctl restart transit-screen
+   ```
+
+**Notes:**
+- Service automatically restarts if the process crashes (with 10s delay)
+- Logs are written to systemd journal instead of a file
+- Service runs as the `pi` user by default (change in `.service` file if needed)
+- Requires `uv` to be installed in `~/.local/bin/` (standard for `uv` on Linux)
+
+### Option 2: crontab
+
+If you prefer crontab, add to your crontab:
 
 ```bash
 crontab -e
@@ -294,7 +362,7 @@ Add the line:
 @reboot /home/pi/transit-screen/scripts/start.sh
 ```
 
-Replace path as needed.
+This is simpler but won't auto-restart if the process crashes.
 
 ## Project Structure
 
