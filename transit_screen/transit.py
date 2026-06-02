@@ -1,6 +1,7 @@
 import json
-import requests
 from datetime import datetime, timezone
+
+import requests
 from dateutil import tz
 
 from . import config

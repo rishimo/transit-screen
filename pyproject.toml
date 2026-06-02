@@ -9,10 +9,22 @@ dependencies = [
   "requests",
   "python-dotenv",
   "python-dateutil",
-  "spidev",
-  "RPi.GPIO",
+  "spidev; sys_platform == 'linux'",
+  "RPi.GPIO; sys_platform == 'linux'",
 ]
 
+[project.optional-dependencies]
+dev = ["ruff"]
+
 [tool.uv]
+# Use PyPI by default, but provide piwheels as fallback for Pi wheels
 find-links = ["./wheels"]
-index-url = "https://piwheels.org/simple"
+# Resolve for current platform first, fall back to piwheels for Linux
+index-url = "https://pypi.org/simple"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]

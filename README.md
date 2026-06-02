@@ -30,7 +30,7 @@ This project is based on James Howard's [e_paper_weather_display](https://github
    cp .env.example .env
    ```
    Then edit `.env` and add:
-   - `OPENWEATHER_API_KEY` — from [OpenWeatherMap](https://openweathermap.org/api)
+   - `PIRATE_WEATHER_API_KEY` — from [Pirate Weather](https://pirate-weather.apiable.io)
    - `TRANSIT_API_KEY` — from [511.org](https://511.org/developer-resources/transit-api)
    - `LAT`, `LONG` — your coordinates (defaults: San Francisco)
 
@@ -112,7 +112,7 @@ transit-screen/
 ├── transit_screen/          # Main package
 │   ├── main.py              # Orchestration loop
 │   ├── config.py            # Configuration
-│   ├── weather.py           # OpenWeatherMap API
+│   ├── weather.py           # Pirate Weather API
 │   ├── transit.py           # 511.org transit API
 │   └── display.py           # Rendering & display control
 ├── scripts/                 # Helper scripts
@@ -133,6 +133,6 @@ transit-screen/
 
 ## API References
 
-- [OpenWeatherMap One Call API](https://openweathermap.org/api/one-call-api)
+- [Pirate Weather API](https://pirate-weather.apiable.io)
 - [511.org Transit API](https://511.org/developer-resources/transit-api)
 - [Waveshare 7.5" Display Docs](https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT)

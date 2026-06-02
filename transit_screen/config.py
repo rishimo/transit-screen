@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 TRANSIT_API_KEY: str = os.environ["TRANSIT_API_KEY"]
-OPENWEATHER_API_KEY: str = os.environ["OPENWEATHER_API_KEY"]
+PIRATE_WEATHER_API_KEY: str = os.environ["PIRATE_WEATHER_API_KEY"]
 LAT: str = os.environ["LAT"]
 LONG: str = os.environ["LONG"]
 

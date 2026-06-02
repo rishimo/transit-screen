@@ -1,7 +1,7 @@
 import sys
 import time
-from pathlib import Path
 from datetime import datetime
+
 from PIL import Image, ImageDraw, ImageFont
 
 from . import config

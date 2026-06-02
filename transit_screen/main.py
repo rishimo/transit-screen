@@ -1,13 +1,13 @@
+import csv
 import sys
 import time
-import csv
 from datetime import datetime
 from pathlib import Path
 
 from . import config
-from .weather import get_weather
+from .display import clear_display, render_screen, show_error, write_to_display
 from .transit import get_next_transit
-from .display import render_screen, write_to_display, clear_display, show_error
+from .weather import get_weather
 
 sys.path.insert(0, str(config.LIB_DIR))
 try:
@@ -91,7 +91,7 @@ def main():
             try:
                 show_error(epd, "CONNECTION" if "requests" in str(type(e)) else "HTTP")
                 time.sleep(config.ERROR_RETRY_INTERVAL)
-            except:
+            except Exception:
                 time.sleep(config.ERROR_RETRY_INTERVAL)
 
 
